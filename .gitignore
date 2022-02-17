@@ -1,0 +1,15 @@
+/.curseclient
+/config
+/crash-reports
+/defaultconfigs
+/downloads
+/local
+/logs
+/minecraftinstance.json
+/mods
+/options.txt
+/resourcepacks
+/saves
+/schematics
+/usercache.json
+/usernamecache.json
