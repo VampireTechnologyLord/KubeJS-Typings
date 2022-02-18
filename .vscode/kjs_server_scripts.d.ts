@@ -32,35 +32,35 @@ interface IEventRecipeFilter {
     /**
      * Filter recipes based on their output items.
      * @example // remove by output item id
-     * event.remove({output: "minecraft:stone"})
+     * event.remove({output: 'minecraft:stone'})
      * @example // remove by output item tag
-     * event.remove({output: "#minecraft:wool"})
+     * event.remove({output: '#minecraft:wool'})
      */
     output: string;
     /**
      * Filter recipes based on their output items.
      * @example // remove by input item id
-     * event.remove({input: "minecraft:stone"})
+     * event.remove({input: 'minecraft:stone'})
      * @example // remove by input item tag
-     * event.remove({input: "#minecraft:wool"})
+     * event.remove({input: '#minecraft:wool'})
      */
     input: string;
     /**
      * Filter recipes based on the mod that added them.
      * @example // remove by mod that added the recipe
-     * event.remove({mod: "ftbquests"})
+     * event.remove({mod: 'ftbquests'})
      */
     mod: string;
     /**
      * Filter recipes based on the type of crafting used to craft the result item.
      * @example // remove by crafting type
-     * event.remove({type: "minecraft:campfire_cooking"})
+     * event.remove({type: 'minecraft:campfire_cooking'})
      */
     type: string;
     /**
      * Filter recipes based on the recipe id. Usually following the format `<mod_id>:<recipe_json_file_name>`
      * @example // remove by recipe id
-     * event.remove({id: "minecraft:glowstone"})
+     * event.remove({id: 'minecraft:glowstone'})
      */
     id: string;
 }
@@ -76,9 +76,9 @@ interface IRecipeShaped {
      * @param ingredient_index The index of the ingredient to damage.
      * @example // slot ids:
      * [
-     * "012"
-     * "345",
-     * "678",
+     * '012'
+     * '345',
+     * '678',
      * ]
      */
     damageIngredient(ingredient_index: number): IRecipeShaped;
@@ -92,7 +92,7 @@ interface IRecipeShaped {
      * @param original_item The original item in the craft that will later be replaced.
      * @param replaced_item The item that replaces the original item.
      * @example
-     * replaceIngredient({item: Item.of('minecraft:potion', {Potion: "minecraft:water"})}, 'minecraft:glass_bottle')
+     * replaceIngredient({item: Item.of('minecraft:potion', {Potion: 'minecraft:water'})}, 'minecraft:glass_bottle')
      */
     replaceIngredient(
         original_item: IItemAdvanced | string,
@@ -115,7 +115,7 @@ interface IRecipeShapeless {
      * @param original_item The original item in the craft that will later be replaced.
      * @param replaced_item The item that replaces the original item.
      * @example
-     * replaceIngredient({item: Item.of('minecraft:potion', {Potion: "minecraft:water"})}, 'minecraft:glass_bottle')
+     * replaceIngredient({item: Item.of('minecraft:potion', {Potion: 'minecraft:water'})}, 'minecraft:glass_bottle')
      */
     replaceIngredient(
         original_item: IItemAdvanced | string,
@@ -136,6 +136,11 @@ interface IItemAdvanced {
      * Ignore the NBT of an item.
      */
     ignoreNBT(): void;
+    /**
+     * Set a chance of an extra item or similar. **Only use when specified!**
+     * @param percent The chance to get whatever item specified. Ranges from 0.0 (0%) to 1.0 (100%).
+     */
+    chance(percent:number): void
 }
 
 interface IItemNBT {
@@ -151,7 +156,7 @@ interface IItem {
      * @param item The item id.
      * @param NBT The item NBT. Specification not required.
      */
-    of(item: string, NBT: IItemNBT = null): IItemAdvanced;
+    of(item: string, NBT:IItemNBT): IItemAdvanced;
 }
 
 interface IMekanismGas {
@@ -193,14 +198,22 @@ interface IModRecipes {
     create: ICreateRecipes;
 }
 
-interface IRecipeChance {
-    chance(percent:number): IRecipeChance
-    /**
-     * Set a recipe ID to a specific recipe instead of having an automatically generated one.
-     * @param recipe_id The id of the recipe. Format: `<modID>:<recipeID>`
-     */
-    id(recipe_id: string): IRecipeChance;
+interface IImmersiveEngineeringRecipes {
+
 }
+
+interface IThermalRecipes {
+
+}
+
+interface IBloodmagicRecipes {
+
+}
+
+interface ICreateRecipes {
+    
+}
+
 
 interface IMekanismRecipes {
     /**
@@ -209,7 +222,7 @@ interface IMekanismRecipes {
      * @param output The output item.
      * @param input The input item.
      * @example // create a crushing recipe that makes 2 stone from 1 dirt.
-     * event.recipes.mekanism.crushing("2x minecraft:stone", "minecraft:dirt")
+     * event.recipes.mekanism.crushing('2x minecraft:stone', 'minecraft:dirt')
      */
     crushing(
         output: IItemAdvanced | string,
@@ -221,7 +234,7 @@ interface IMekanismRecipes {
      * @param output The output item.
      * @param input The input item.
      * @example // create a enriching recipe that makes 2 stone from 1 dirt.
-     * event.recipes.mekanism.enriching("2x minecraft:stone", "minecraft:dirt")
+     * event.recipes.mekanism.enriching('2x minecraft:stone', 'minecraft:dirt')
      */
     enriching(
         output: IItemAdvanced | string,
@@ -233,7 +246,7 @@ interface IMekanismRecipes {
      * @param output The output item.
      * @param input The input item.
      * @example // create a smelting recipe that makes 2 stone from 1 dirt.
-     * event.recipes.mekanism.smelting("2x minecraft:stone", "minecraft:dirt")
+     * event.recipes.mekanism.smelting('2x minecraft:stone', 'minecraft:dirt')
      */
     smelting(
         output: IItemAdvanced | string,
@@ -306,7 +319,16 @@ interface IMekanismRecipes {
      * event.recipes.mekanismMetallurgicInfusing('minecraft:comparator', 'minecraft:nether_quartz', 'mekanism:redstone', 20)
      */
     metallurgicInfusion(output:IItemAdvanced | string, input_item:IItemAdvanced | string, infusion_type:string, infusion_amount:number): IDefaultRecipe;
-    sawing(): IDefaultRecipe;
+    /**
+     * #### `KubeJS` + `KubeJS Mekanism`
+     * Creates a mekanism sawing recipe with a secondary output that can have a specified chance of happening.
+     * @param output The primary result item.
+     * @param input The input item.
+     * @param extra The secondary result item. Can use `Item.of('ID').chance(0.3)`
+     * @example // create a sawing recipe that takes a brick and makes redstone dust. It also has a 30% chance of having clay as a secondary output.
+     * event.recipes.mekanismSawing('minecraft:redstone', 'minecraft:brick', item.of('minecraft:clay').chance(0.3))
+     */
+    sawing(output:IItemAdvanced | string, input:IItemAdvanced | string, extra:IItemAdvanced): IDefaultRecipe;
 }
 
 /**
@@ -338,7 +360,7 @@ interface IEventRecipe {
      * Remove a recipe by one or multiple criteria or filter.
      * @param remove_by The criteria / filter that is used to select the recipe taht will be removed.
      * @example
-     * event.remove({output: "minecraft:diamond_block"})
+     * event.remove({output: 'minecraft:diamond_block'})
      */
     remove(remove_by: IEventRecipeFilter): IRecipeShaped;
     /**
@@ -346,7 +368,7 @@ interface IEventRecipe {
      * Create a shapeless recipe.
      * @param result_item The resulting item.
      * @param ingredients The items required for the crafting. The order of the ingredients does not matter.
-     * @example // create a shapeless recipe that uses stone and any items that have the tag "#forge:dusts/glowstone".
+     * @example // create a shapeless recipe that uses stone and any items that have the tag '#forge:dusts/glowstone'.
      * event.shapeless('4x minecraft:cobblestone', ['minecraft:stone', '#forge:dusts/glowstone'])
      */
     shapeless(result_item: string, ingredients: string[]): IRecipeShapeless;
@@ -412,7 +434,7 @@ interface IEventRecipe {
     /**
      * #### `KubeJS`
      * Create a custom recipe
-     * If you use `event.custom({json})` it will be using vanilla Json/datapack syntax. Must include `"type": "mod:recipe_id"!`. You can add recipe to any recipe handler that uses vanilla recipe system or isn't supported by KubeJS. You can copy-paste the json directly, but you can also make more javascript-y by removing quotation marks from keys. You can replace `{item: 'x', count: 4}` in result fields with `Item.of('x', 4).toResultJson()`. You can replace `{item: 'x'} / {tag: 'x'}` with `Ingredient.of('x').toJson()` or `Ingredient.of('#x').toJson()`.
+     * If you use `event.custom({json})` it will be using vanilla Json/datapack syntax. Must include `'type': 'mod:recipe_id'!`. You can add recipe to any recipe handler that uses vanilla recipe system or isn't supported by KubeJS. You can copy-paste the json directly, but you can also make more javascript-y by removing quotation marks from keys. You can replace `{item: 'x', count: 4}` in result fields with `Item.of('x', 4).toResultJson()`. You can replace `{item: 'x'} / {tag: 'x'}` with `Ingredient.of('x').toJson()` or `Ingredient.of('#x').toJson()`.
      * @param recipe_type The recipe type. Usual format: `<modID>:<recipe_type>`.
      * @param json_args The other JSON recipe parameter.
      */
@@ -455,17 +477,23 @@ interface IEventRecipe {
     recipes: IModRecipes;
 }
 
-interface IEventItemTagEvent {
+interface IEventItemTag {
     // event stuff here
+    testprop2
 }
 
-interface IEventFTBQuestsCompleted {}
+interface IEventFTBQuestsCompleted {
+    testProp
+}
+
+
 
 interface IEventTypes {
-    recipes: IEventRecipe;
-    "item.tags": IEventItemTagEvent;
-    "ftbquests.completed.((#.+)|(h){8})": IEventFTBQuestsCompleted;
+    'recipes': IEventRecipe;
+    'item.tags': IEventItemTag;
+    [ftbquests :string]: IEventFTBQuestsCompleted;
 }
+
 
 /**
  * Listens for a specified event.
@@ -476,3 +504,27 @@ declare function onEvent<T extends keyof IEventTypes, E extends IEventTypes[T]>(
     type: T,
     handle: (e: E) => void
 ): void;
+
+
+
+
+//   interface SomeOtherOddEvent {
+//     // event stuff here
+//   }
+   
+type EventTypes={
+    [id in questID]: IEventFTBQuestsCompleted;
+    }&{
+    // [id in someOtherOddID]: SomeOtherOddEvent;
+    // }&{
+    recipes: IEventRecipe;
+    'item.tags': IEventItemTag;
+};
+   
+type questIDCompleted = `ftbquests.completed`;
+type questID = questIDCompleted | `${questIDCompleted}.${string}`;
+   
+type someOtherOddID = `${string}.${number}`;
+   
+  declare function onEvent<T extends keyof EventTypes, E extends EventTypes[T]>(type: T, handle: (e: E) => void): void;
+   
