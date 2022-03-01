@@ -1,3 +1,20 @@
+/**
+ * Recipe Settings. Configure which recipe events (`added`, `removed`, `skipped`, `erroring`) will be logged to the console.
+ */
+declare const settings: ISettings;
+
+
+/**
+ * Item property.
+ */
+ declare const Item: IItem;
+
+/**
+ * Fluid properties.
+ */
+declare const Fluid: IFluid;
+
+
 //#region settings
 interface ISettings {
     /**
@@ -17,10 +34,6 @@ interface ISettings {
      */
     logErroringRecipes: boolean;
 }
-/**
- * Recipe Settings. Configure which recipe events (`added`, `removed`, `skipped`, `erroring`) will be logged to the console.
- */
-declare const settings: ISettings;
 //#endregion settings
 // 090611
 
@@ -65,12 +78,7 @@ interface IEventRecipeFilter {
     id: string;
 }
 
-interface IRecipeShaped {
-    /**
-     * Set a recipe ID to a specific recipe instead of having an automatically generated one.
-     * @param recipe_id The id of the recipe. Format: `<modID>:<recipeID>`
-     */
-    id(recipe_id: string): IRecipeShaped;
+interface IRecipeShaped extends IDefaultRecipe{
     /**
      * Damages an ingredient at a specified index (durability).
      * @param ingredient_index The index of the ingredient to damage.
@@ -98,13 +106,54 @@ interface IRecipeShaped {
         original_item: IItemAdvanced | string,
         replaced_item: string
     ): IRecipeShaped;
+
+
 }
-interface IRecipeShapeless {
-    /**
-     * Set a recipe ID to a specific recipe instead of having an automatically generated one.
-     * @param recipe_id The id of the recipe. Format: `<modID>:<recipeID>`
-     */
-    id(recipe_id: string): IRecipeShapeless;
+
+interface IRecipeCustom {
+    /**Required property*/
+    type:string
+    /**Frequently used property*/
+    pattern?:string[]
+    /**Frequently used property*/
+    key?:object[]
+    /**Frequently used property*/
+    result?:string
+    /**Frequently used property*/
+    result?:string[]
+    /**Frequently used property*/
+    result?:object
+    /**Frequently used property*/
+    result?:object[]
+    /**Frequently used property*/
+    fluid?:IFluidTag
+    /**Frequently used property*/
+    fluid?:IFluidTag[]
+    /**Frequently used property*/
+    duration?:number
+    /**Frequently used property*/
+    temperature?:number
+    /**Frequently used property*/
+    mana?:number
+    /**Frequently used property*/
+    cooling_time?:number
+    /**Frequently used property*/
+    time?:number
+    /**Frequently used property*/
+    processing_time?:number
+    /**Frequently used property*/
+    duration?:number
+    /**Frequently used property*/
+    input?:string
+    /**Frequently used property*/
+    input?:string[]
+    /**Frequently used property*/
+    output?:string
+    /**Frequently used property*/
+    output?:string[]
+
+}
+interface IRecipeShapeless extends IDefaultRecipe{
     /**
      * Damages an Item (durability).
      * @param item The Item to damage.
@@ -128,7 +177,12 @@ interface IDefaultRecipe {
      * Set a recipe ID to a specific recipe instead of having an automatically generated one.
      * @param recipe_id The id of the recipe. Format: `<modID>:<recipeID>`
      */
-    id(recipe_id: string): void;
+    id(recipe_id: string): string;
+    /**
+     * Set a recipe ID to a specific recipe instead of having an automatically generated one.
+     * @param recipe_id The id of the recipe. Format: `<modID>:<recipeID>`
+     */
+    id(recipe_id: string): IDefaultRecipe;    
 }
 
 interface IItemAdvanced {
@@ -141,7 +195,24 @@ interface IItemAdvanced {
      * @param percent The chance to get whatever item specified. Ranges from 0.0 (0%) to 1.0 (100%).
      */
     chance(percent:number): void
+    
+    /**
+     * Set a chance of an extra item or similar. **Only use when specified!**
+     * @param percent The chance to get whatever item specified. Ranges from 0.0 (0%) to 1.0 (100%).
+     */
+    withChance(percent:number): void
 }
+
+
+interface IFluidAdvanced {
+
+}
+
+interface IFluidTag {
+    fluidTag: string
+    amount: number
+}
+
 
 interface IItemNBT {
     /**
@@ -159,6 +230,15 @@ interface IItem {
     of(item: string, NBT:IItemNBT): IItemAdvanced;
 }
 
+interface IFluid {
+    /**
+     * Get the advanced properties of a fluid.
+     * @param fluid The fluid id.
+     * @param amount The amount of fluid.
+     */
+     of(fluid: string, amount:number): IFluidAdvanced;
+}
+
 interface IMekanismGas {
     /**
      * The type of gase used.
@@ -168,6 +248,21 @@ interface IMekanismGas {
      * The amount of gas used (`mb`).
      */
     amount: number;
+}
+
+interface ICreateHeating extends IDefaultRecipe{
+    /**
+     * Requires a recipe to be heated
+     */
+    heated(): IDefaultRecipe
+    /**
+     * Requires a recipe to be superheated
+     */
+    superheated(): IDefaultRecipe
+}
+
+interface ICreateMechCraftPattern {
+
 }
 
 interface IModRecipes {
@@ -211,7 +306,683 @@ interface IBloodmagicRecipes {
 }
 
 interface ICreateRecipes {
+    //#region conversion
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create conversion recipe.
+     * @param output The output fluid tag.
+     * @param input The fluid tag.
+     */
+    conversion(output:IFluidTag, input:IFluidTag): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create conversion recipe.
+     * @param output The output item id.
+     * @param input The input item id.
+     */
+    conversion(output:string, input:string): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create conversion recipe.
+     * @param output The output item.
+     * @param input The input item.
+     */
+    conversion(output:IItemAdvanced, input:IItemAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create conversion recipe.
+     * @param output The output fluid.
+     * @param input The input fluid.
+     */
+    conversion(output:IFluidAdvanced, input:IFluidAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create conversion recipe.
+     * @param output The output item ids.
+     * @param input The input item ids.
+     */
+    conversion(output:string[], input:string[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create conversion recipe.
+     * @param output The output items.
+     * @param input The input items.
+     */
+    conversion(output:IItemAdvanced[], input:IItemAdvanced[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create conversion recipe.
+     * @param output The output fluids.
+     * @param input The input fluids.
+     */
+    conversion(output:IFluidAdvanced[], input:IFluidAdvanced[]): IDefaultRecipe
+    //#endregion conversion
     
+    //#region crushing
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create crushing recipe.
+     * @param output The output fluid tag.
+     * @param input Thfluid tags).
+     */
+    crushing(output:IFluidTag, input:IFluidTag): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create crushing recipe.
+     * @param output The output item id.
+     * @param input The input item id.
+     */
+    crushing(output:string, input:string): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create crushing recipe.
+     * @param output The output item.
+     * @param input The input item.
+     */
+    crushing(output:IItemAdvanced, input:IItemAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create crushing recipe.
+     * @param output The output fluid.
+     * @param input The input fluid.
+     */
+    crushing(output:IFluidAdvanced, input:IFluidAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create crushing recipe.
+     * @param output The output item ids.
+     * @param input The input item ids.
+     */
+    crushing(output:string[], input:string[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create crushing recipe.
+     * @param output The output items.
+     * @param input The input items.
+     */
+    crushing(output:IItemAdvanced[], input:IItemAdvanced[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create crushing recipe.
+     * @param output The output fluids.
+     * @param input The input fluids.
+     */
+    crushing(output:IFluidAdvanced[], input:IFluidAdvanced[]): IDefaultRecipe
+    //#endregion crushing
+
+
+    //#region cutting
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create cutting recipe.
+     * @param output The output fluid tag.
+     * @param input Thfluid tags).
+     */
+    cutting(output:IFluidTag, input:IFluidTag): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create cutting recipe.
+     * @param output The output item id.
+     * @param input The input item id.
+     */
+    cutting(output:string, input:string): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create cutting recipe.
+     * @param output The output item.
+     * @param input The input item.
+     */
+    cutting(output:IItemAdvanced, input:IItemAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create cutting recipe.
+     * @param output The output fluid.
+     * @param input The input fluid.
+     */
+    cutting(output:IFluidAdvanced, input:IFluidAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create cutting recipe.
+     * @param output The output item ids.
+     * @param input The input item ids.
+     */
+    cutting(output:string[], input:string[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create cutting recipe.
+     * @param output The output items.
+     * @param input The input items.
+     */
+    cutting(output:IItemAdvanced[], input:IItemAdvanced[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create cutting recipe.
+     * @param output The output fluids.
+     * @param input The input fluids.
+     */
+    cutting(output:IFluidAdvanced[], input:IFluidAdvanced[]): IDefaultRecipe
+    //#endregion cutting
+    //#region milling
+    /**
+    * #### `KubeJS` + `KubeJS Create`
+    * Create a create milling recipe.
+    * @param output The output fluid tag.
+    * @param input Thfluid tags).
+    */
+    milling(output:IFluidTag, input:IFluidTag): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create milling recipe.
+     * @param output The output item id.
+     * @param input The input item id.
+     */
+    milling(output:string, input:string): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create milling recipe.
+     * @param output The output item.
+     * @param input The input item.
+     */
+    milling(output:IItemAdvanced, input:IItemAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create milling recipe.
+     * @param output The output fluid.
+     * @param input The input fluid.
+     */
+    milling(output:IFluidAdvanced, input:IFluidAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create milling recipe.
+     * @param output The output item ids.
+     * @param input The input item ids.
+     */
+    milling(output:string[], input:string[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create milling recipe.
+     * @param output The output items.
+     * @param input The input items.
+     */
+    milling(output:IItemAdvanced[], input:IItemAdvanced[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create milling recipe.
+     * @param output The output fluids.
+     * @param input The input fluids.
+     */
+    milling(output:IFluidAdvanced[], input:IFluidAdvanced[]): IDefaultRecipe
+    //#endregion milling
+
+    //#region basin
+    /**
+    * #### `KubeJS` + `KubeJS Create`
+    * Create a create basin recipe.
+    * @param output The output fluid tag.
+    * @param input Thfluid tags).
+    */
+    basin(output:IFluidTag, input:IFluidTag): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create basin recipe.
+     * @param output The output item id.
+     * @param input The input item id.
+     */
+    basin(output:string, input:string): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create basin recipe.
+     * @param output The output item.
+     * @param input The input item.
+     */
+    basin(output:IItemAdvanced, input:IItemAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create basin recipe.
+     * @param output The output fluid.
+     * @param input The input fluid.
+     */
+    basin(output:IFluidAdvanced, input:IFluidAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create basin recipe.
+     * @param output The output item ids.
+     * @param input The input item ids.
+     */
+    basin(output:string[], input:string[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create basin recipe.
+     * @param output The output items.
+     * @param input The input items.
+     */
+    basin(output:IItemAdvanced[], input:IItemAdvanced[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create basin recipe.
+     * @param output The output fluids.
+     * @param input The input fluids.
+     */
+    basin(output:IFluidAdvanced[], input:IFluidAdvanced[]): IDefaultRecipe
+    //#endregion basin
+
+
+    //#region mixing
+    /**
+    * #### `KubeJS` + `KubeJS Create`
+    * Create a create mixing recipe.
+    * @param output The output fluid tag.
+    * @param input Thfluid tags).
+    */
+    mixing(output:IFluidTag, input:IFluidTag): ICreateHeating
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create mixing recipe.
+     * @param output The output item id.
+     * @param input The input item id.
+     */
+    mixing(output:string, input:string): ICreateHeating
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create mixing recipe.
+     * @param output The output item.
+     * @param input The input item.
+     */
+    mixing(output:IItemAdvanced, input:IItemAdvanced): ICreateHeating
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create mixing recipe.
+     * @param output The output fluid.
+     * @param input The input fluid.
+     */
+    mixing(output:IFluidAdvanced, input:IFluidAdvanced): ICreateHeating
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create mixing recipe.
+     * @param output The output item ids.
+     * @param input The input item ids.
+     */
+    mixing(output:string[], input:string[]): ICreateHeating
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create mixing recipe.
+     * @param output The output items.
+     * @param input The input items.
+     */
+    mixing(output:IItemAdvanced[], input:IItemAdvanced[]): ICreateHeating
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create mixing recipe.
+     * @param output The output fluids.
+     * @param input The input fluids.
+     */
+    mixing(output:IFluidAdvanced[], input:IFluidAdvanced[]): ICreateHeating
+    //#endregion mixing
+
+
+    //#region compacting
+    /**
+    * #### `KubeJS` + `KubeJS Create`
+    * Create a create compacting recipe.
+    * @param output The output fluid tag.
+    * @param input Thfluid tags).
+    */
+    compacting(output:IFluidTag, input:IFluidTag): ICreateHeating
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create compacting recipe.
+     * @param output The output item id.
+     * @param input The input item id.
+     */
+    compacting(output:string, input:string): ICreateHeating
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create compacting recipe.
+     * @param output The output item.
+     * @param input The input item.
+     */
+    compacting(output:IItemAdvanced, input:IItemAdvanced): ICreateHeating
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create compacting recipe.
+     * @param output The output fluid.
+     * @param input The input fluid.
+     */
+    compacting(output:IFluidAdvanced, input:IFluidAdvanced): ICreateHeating
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create compacting recipe.
+     * @param output The output item ids.
+     * @param input The input item ids.
+     */
+    compacting(output:string[], input:string[]): ICreateHeating
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create compacting recipe.
+     * @param output The output items.
+     * @param input The input items.
+     */
+    compacting(output:IItemAdvanced[], input:IItemAdvanced[]): ICreateHeating
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create compacting recipe.
+     * @param output The output fluids.
+     * @param input The input fluids.
+     */
+    compacting(output:IFluidAdvanced[], input:IFluidAdvanced[]): ICreateHeating
+    //#endregion compacting
+
+    //#region pressing
+    /**
+    * #### `KubeJS` + `KubeJS Create`
+    * Create a create pressing recipe.
+    * @param output The output fluid tag.
+    * @param input Thfluid tags).
+    */
+    pressing(output:IFluidTag, input:IFluidTag): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create pressing recipe.
+     * @param output The output item id.
+     * @param input The input item id.
+     */
+    pressing(output:string, input:string): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create pressing recipe.
+     * @param output The output item.
+     * @param input The input item.
+     */
+    pressing(output:IItemAdvanced, input:IItemAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create pressing recipe.
+     * @param output The output fluid.
+     * @param input The input fluid.
+     */
+    pressing(output:IFluidAdvanced, input:IFluidAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create pressing recipe.
+     * @param output The output item ids.
+     * @param input The input item ids.
+     */
+    pressing(output:string[], input:string[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create pressing recipe.
+     * @param output The output items.
+     * @param input The input items.
+     */
+    pressing(output:IItemAdvanced[], input:IItemAdvanced[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create pressing recipe.
+     * @param output The output fluids.
+     * @param input The input fluids.
+     */
+    pressing(output:IFluidAdvanced[], input:IFluidAdvanced[]): IDefaultRecipe
+    //#endregion pressing
+
+    //#region sandpaperPolishing
+    /**
+    * #### `KubeJS` + `KubeJS Create`
+    * Create a create sandpaperPolishing recipe.
+    * @param output The output fluid tag.
+    * @param input Thfluid tags).
+    */
+    sandpaperPolishing(output:IFluidTag, input:IFluidTag): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create sandpaperPolishing recipe.
+     * @param output The output item id.
+     * @param input The input item id.
+     */
+    sandpaperPolishing(output:string, input:string): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create sandpaperPolishing recipe.
+     * @param output The output item.
+     * @param input The input item.
+     */
+    sandpaperPolishing(output:IItemAdvanced, input:IItemAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create sandpaperPolishing recipe.
+     * @param output The output fluid.
+     * @param input The input fluid.
+     */
+    sandpaperPolishing(output:IFluidAdvanced, input:IFluidAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create sandpaperPolishing recipe.
+     * @param output The output item ids.
+     * @param input The input item ids.
+     */
+    sandpaperPolishing(output:string[], input:string[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create sandpaperPolishing recipe.
+     * @param output The output items.
+     * @param input The input items.
+     */
+    sandpaperPolishing(output:IItemAdvanced[], input:IItemAdvanced[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create sandpaperPolishing recipe.
+     * @param output The output fluids.
+     * @param input The input fluids.
+     */
+    sandpaperPolishing(output:IFluidAdvanced[], input:IFluidAdvanced[]): IDefaultRecipe
+    //#endregion sandpaperPolishing
+
+    //#region splashing
+    /**
+    * #### `KubeJS` + `KubeJS Create`
+    * Create a create splashing recipe.
+    * @param output The output fluid tag.
+    * @param input Thfluid tags).
+    */
+    splashing(output:IFluidTag, input:IFluidTag): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create splashing recipe.
+     * @param output The output item id.
+     * @param input The input item id.
+     */
+    splashing(output:string, input:string): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create splashing recipe.
+     * @param output The output item.
+     * @param input The input item.
+     */
+    splashing(output:IItemAdvanced, input:IItemAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create splashing recipe.
+     * @param output The output fluid.
+     * @param input The input fluid.
+     */
+    splashing(output:IFluidAdvanced, input:IFluidAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create splashing recipe.
+     * @param output The output item ids.
+     * @param input The input item ids.
+     */
+    splashing(output:string[], input:string[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create splashing recipe.
+     * @param output The output items.
+     * @param input The input items.
+     */
+    splashing(output:IItemAdvanced[], input:IItemAdvanced[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create splashing recipe.
+     * @param output The output fluids.
+     * @param input The input fluids.
+     */
+    splashing(output:IFluidAdvanced[], input:IFluidAdvanced[]): IDefaultRecipe
+    //#endregion splashing
+
+    //#region deploying
+    /**
+    * #### `KubeJS` + `KubeJS Create`
+    * Create a create deploying recipe.
+    * @param output The output fluid tag.
+    * @param input Thfluid tags).
+    */
+    deploying(output:IFluidTag, input:IFluidTag): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create deploying recipe.
+     * @param output The output item id.
+     * @param input The input item id.
+     */
+    deploying(output:string, input:string): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create deploying recipe.
+     * @param output The output item.
+     * @param input The input item.
+     */
+    deploying(output:IItemAdvanced, input:IItemAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create deploying recipe.
+     * @param output The output fluid.
+     * @param input The input fluid.
+     */
+    deploying(output:IFluidAdvanced, input:IFluidAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create deploying recipe.
+     * @param output The output item ids.
+     * @param input The input item ids.
+     */
+    deploying(output:string[], input:string[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create deploying recipe.
+     * @param output The output items.
+     * @param input The input items.
+     */
+    deploying(output:IItemAdvanced[], input:IItemAdvanced[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create deploying recipe.
+     * @param output The output fluids.
+     * @param input The input fluids.
+     */
+    deploying(output:IFluidAdvanced[], input:IFluidAdvanced[]): IDefaultRecipe
+    //#endregion deploying
+
+    //#region filling
+    /**
+    * #### `KubeJS` + `KubeJS Create`
+    * Create a create filling recipe.
+    * @param output The output fluid tag.
+    * @param input Thfluid tags).
+    */
+    filling(output:IFluidTag, input:IFluidTag): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create filling recipe.
+     * @param output The output item id.
+     * @param input The input item id.
+     */
+    filling(output:string, input:string): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create filling recipe.
+     * @param output The output item.
+     * @param input The input item.
+     */
+    filling(output:IItemAdvanced, input:IItemAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create filling recipe.
+     * @param output The output fluid.
+     * @param input The input fluid.
+     */
+    filling(output:IFluidAdvanced, input:IFluidAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create filling recipe.
+     * @param output The output item ids.
+     * @param input The input item ids.
+     */
+    filling(output:string[], input:string[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create filling recipe.
+     * @param output The output items.
+     * @param input The input items.
+     */
+    filling(output:IItemAdvanced[], input:IItemAdvanced[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create filling recipe.
+     * @param output The output fluids.
+     * @param input The input fluids.
+     */
+    filling(output:IFluidAdvanced[], input:IFluidAdvanced[]): IDefaultRecipe
+    //#endregion filling
+
+    //#region empying
+    /**
+    * #### `KubeJS` + `KubeJS Create`
+    * Create a create empying recipe.
+    * @param output The output fluid tag.
+    * @param input Thfluid tags).
+    */
+    empying(output:IFluidTag, input:IFluidTag): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create empying recipe.
+     * @param output The output item id.
+     * @param input The input item id.
+     */
+    empying(output:string, input:string): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create empying recipe.
+     * @param output The output item.
+     * @param input The input item.
+     */
+    empying(output:IItemAdvanced, input:IItemAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create empying recipe.
+     * @param output The output fluid.
+     * @param input The input fluid.
+     */
+    empying(output:IFluidAdvanced, input:IFluidAdvanced): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create empying recipe.
+     * @param output The output item ids.
+     * @param input The input item ids.
+     */
+    empying(output:string[], input:string[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create empying recipe.
+     * @param output The output items.
+     * @param input The input items.
+     */
+    empying(output:IItemAdvanced[], input:IItemAdvanced[]): IDefaultRecipe
+    /**
+     * #### `KubeJS` + `KubeJS Create`
+     * Create a create empying recipe.
+     * @param output The output fluids.
+     * @param input The input fluids.
+     */
+    empying(output:IFluidAdvanced[], input:IFluidAdvanced[]): IDefaultRecipe
+    //#endregion empying
 }
 
 
@@ -270,55 +1041,55 @@ interface IMekanismRecipes {
      * #### `KubeJS` + `KubeJS Mekanism`
      * Creates a mekanism compressing recipe.
      * @param output The result item.
-     * @param input_item The input item.
+     * @param input The input item.
      * @param input_gas The input gas and amount of it.
      * @example // create a compressing recipe that makes obsidian from a lava bucket and 200mb of oxygen.
      * event.recipes.mekanism.compressing('minecraft:obsidian', 'minecraft:lava_bucket', {gas: 'mekanism:oxygen', amount: 200})
      */
     compressing(
         output: IItemAdvanced | string,
-        input_item: IItemAdvanced | string,
+        input: IItemAdvanced | string,
         input_gas: IMekanismGas
     ): IDefaultRecipe;
     /**
      * #### `KubeJS` + `KubeJS Mekanism`
      * Creates a mekanism purifying recipe.
      * @param output The result item.
-     * @param input_item The input item.
+     * @param input The input item.
      * @param input_gas The input gas and amount of it.
      * @example // create a purifying recipe that makes obsidian from a lava bucket and 200mb of oxygen.
      * event.recipes.mekanism.purifying('minecraft:obsidian', 'minecraft:lava_bucket', {gas: 'mekanism:oxygen', amount: 200})
      */
     purifying(
         output: IItemAdvanced | string,
-        input_item: IItemAdvanced | string,
+        input: IItemAdvanced | string,
         input_gas: IMekanismGas
     ): IDefaultRecipe;
     /**
      * #### `KubeJS` + `KubeJS Mekanism`
      * Creates a mekanism injecting recipe.
      * @param output The result item.
-     * @param input_item The input item.
+     * @param input The input item.
      * @param input_gas The input gas and amount of it.
      * @example // create a injecting recipe that makes obsidian from a lava bucket and 200mb of oxygen.
      * event.recipes.mekanism.injecting('minecraft:obsidian', 'minecraft:lava_bucket', {gas: 'mekanism:oxygen', amount: 200})
      */
     injecting(
         output: IItemAdvanced | string,
-        input_item: IItemAdvanced | string,
+        input: IItemAdvanced | string,
         input_gas: IMekanismGas
     ): IDefaultRecipe;
     /**
      * #### `KubeJS` + `KubeJS Mekanism`
      * Creates a mekanism metallurgic infusion recipe.
      * @param output The result item.
-     * @param input_item The input item.
+     * @param input The input item.
      * @param infusion_type The infusion type.
      * @param infusion_amount The amount of infusion (`mb`).
      * @example // create a metallurgic infusion recipe that takes a nether quartz and 20mb redstone infusion to make a redstone comperator.
      * event.recipes.mekanismMetallurgicInfusing('minecraft:comparator', 'minecraft:nether_quartz', 'mekanism:redstone', 20)
      */
-    metallurgicInfusion(output:IItemAdvanced | string, input_item:IItemAdvanced | string, infusion_type:string, infusion_amount:number): IDefaultRecipe;
+    metallurgicInfusion(output:IItemAdvanced | string, input:IItemAdvanced | string, infusion_type:string, infusion_amount:number): IDefaultRecipe;
     /**
      * #### `KubeJS` + `KubeJS Mekanism`
      * Creates a mekanism sawing recipe with a secondary output that can have a specified chance of happening.
@@ -330,11 +1101,6 @@ interface IMekanismRecipes {
      */
     sawing(output:IItemAdvanced | string, input:IItemAdvanced | string, extra:IItemAdvanced): IDefaultRecipe;
 }
-
-/**
- * Item property.
- */
-declare const Item: IItem;
 
 interface IEventRecipe {
     /**
@@ -435,10 +1201,9 @@ interface IEventRecipe {
      * #### `KubeJS`
      * Create a custom recipe
      * If you use `event.custom({json})` it will be using vanilla Json/datapack syntax. Must include `'type': 'mod:recipe_id'!`. You can add recipe to any recipe handler that uses vanilla recipe system or isn't supported by KubeJS. You can copy-paste the json directly, but you can also make more javascript-y by removing quotation marks from keys. You can replace `{item: 'x', count: 4}` in result fields with `Item.of('x', 4).toResultJson()`. You can replace `{item: 'x'} / {tag: 'x'}` with `Ingredient.of('x').toJson()` or `Ingredient.of('#x').toJson()`.
-     * @param recipe_type The recipe type. Usual format: `<modID>:<recipe_type>`.
      * @param json_args The other JSON recipe parameter.
      */
-    custom(recipe_type: string, ...json_args: any): IRecipeShaped;
+    custom(json_args: IRecipeCustom): IRecipeShaped;
     /**
      * #### `KubeJS`
      * Replace the specified input item of all recipes with another item. Recipes can be limited using a filter.
@@ -486,12 +1251,16 @@ interface IEventFTBQuestsCompleted {
     testProp
 }
 
+interface IEventItemCrafted {
+    
+}
 
 
 interface IEventTypes {
     'recipes': IEventRecipe;
     'item.tags': IEventItemTag;
     [ftbquests :string]: IEventFTBQuestsCompleted;
+    'item.crafted': IEventItemCrafted
 }
 
 
@@ -500,7 +1269,7 @@ interface IEventTypes {
  * @param id The event id.
  * @param variable The event object.
  */
-declare function onEvent<T extends keyof IEventTypes, E extends IEventTypes[T]>(
+declare function onEvent<T extends keyof IEventTypes, E extends EventTypes[T]>(
     type: T,
     handle: (e: E) => void
 ): void;
@@ -519,12 +1288,10 @@ type EventTypes={
     // }&{
     recipes: IEventRecipe;
     'item.tags': IEventItemTag;
+    'item.crafted': IEventItemCrafted;
 };
    
 type questIDCompleted = `ftbquests.completed`;
 type questID = questIDCompleted | `${questIDCompleted}.${string}`;
    
 type someOtherOddID = `${string}.${number}`;
-   
-  declare function onEvent<T extends keyof EventTypes, E extends EventTypes[T]>(type: T, handle: (e: E) => void): void;
-   
